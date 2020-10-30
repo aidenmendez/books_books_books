@@ -112,7 +112,7 @@ class LibraryTest < Minitest::Test
     @dpl.checkout(mockingbird)
     @dpl.return(mockingbird)
     @dpl.checkout(mockingbird)
-
+    
     assert_equal mockingbird, @dpl.most_popular_book
   end
 
@@ -131,8 +131,35 @@ class LibraryTest < Minitest::Test
     @dpl.count_checkout(villette)
     @dpl.count_checkout(mockingbird)
     @dpl.count_checkout(mockingbird)
-
+    
     count = {jane_eyre => 1, villette => 1, mockingbird => 2}
     assert_equal count, @dpl.checkouts
+  end
+
+  def test_book_cannot_be_checked_out_twice
+    harper_lee = Author.new({first_name: "Harper", last_name: "Lee"})
+    mockingbird = harper_lee.write("To Kill a Mockingbird", "July 11, 1960")
+  
+    @dpl.add_author(harper_lee)
+    @dpl.checkout(mockingbird)
+
+    assert_equal false, @dpl.checkout(mockingbird)
+  end
+
+  def test_it_can_filter_checked_out_books
+    charlotte_bronte = Author.new({first_name: "Charlotte", last_name: "Bronte"})
+    jane_eyre = charlotte_bronte.write("Jane Eyre", "October 16, 1847")
+    professor = charlotte_bronte.write("The Professor", "1857")
+    villette = charlotte_bronte.write("Villette", "1853")
+    harper_lee = Author.new({first_name: "Harper", last_name: "Lee"})
+    mockingbird = harper_lee.write("To Kill a Mockingbird", "July 11, 1960")
+    books = [professor, mockingbird, villette, jane_eyre]
+
+    @dpl.add_author(charlotte_bronte)
+    @dpl.add_author(harper_lee)
+    @dpl.checkout(jane_eyre)
+    @dpl.checkout(villette)
+    
+    assert_equal [professor, mockingbird], @dpl.check_availability(books)
   end
 end
