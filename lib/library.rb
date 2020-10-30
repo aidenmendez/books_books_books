@@ -1,13 +1,11 @@
 class Library
   attr_reader :name,
-              :books,
               :checked_out_books,
               :authors,
               :checkouts
 
   def initialize(name)
     @name = name
-    @books = []
     @checked_out_books = []
     @authors = []
     @checkouts = {}
@@ -15,8 +13,19 @@ class Library
 
   def add_author(author)
     @authors << author
-    author.books.each do |book|
-      books << book
+  end
+
+  def books
+    books = @authors.flat_map do |author|
+      author.books
+    end
+
+    check_availability(books)    
+  end
+
+  def check_availability(books)
+    books = books.select do |book|
+      !checked_out_books.include?(book)
     end
   end
 
@@ -33,10 +42,10 @@ class Library
   end
 
   def checkout(book)
-    if books.include?(book)
+    if books.include?(book) && !checked_out_books.include?(book)
       count_checkout(book)
-      @books.delete(book)
       @checked_out_books << book
+      true
     else
       false
     end
@@ -52,7 +61,6 @@ class Library
 
   def return(book)
     @checked_out_books.delete(book)
-    @books << book
   end
 
   def most_popular_book
